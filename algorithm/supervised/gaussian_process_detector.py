@@ -25,7 +25,7 @@ class GaussianProcessAD(SupervisedModel):
     Anomaly Detection based on gaussian process.
     """
 
-    def __init__(self, x, y, kernel=Matern, p=0.05, alpha=1e-6, n_iter=10):
+    def __init__(self, x, y, kernel=None, p=0.05, alpha=1e-6, n_iter=10):
         """
 
         Args:
@@ -43,6 +43,8 @@ class GaussianProcessAD(SupervisedModel):
                 The number if iterations for the optimizer to find the kernel's parameters.
         """
         super().__init__(x=x, y=y)
+        if kernel is None:
+            kernel = Matern(nu=2.5)
         self.kernel = kernel
         self.ppf = norm.ppf(1 - p)
         self.alpha = alpha
