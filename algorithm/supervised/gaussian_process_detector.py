@@ -12,7 +12,7 @@
     Change Activity :
             version0 : 6:16 下午 by shendu.ht  init
 """
-import numpy
+import numpy as np
 from scipy.stats import norm
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
@@ -25,13 +25,13 @@ class GaussianProcessAD(SupervisedModel):
     Anomaly Detection based on gaussian process.
     """
 
-    def __init__(self, x, y, kernel=None, p=0.05, alpha=1e-6, n_iter=10):
+    def __init__(self, x, y, kernel=None, p=0.0001, alpha=1e-6, n_iter=10):
         """
 
         Args:
-            x: numpy.ndarray, shape=(n, n_features)
+            x: np.ndarray, shape=(n, n_features)
                 Train input data
-            y: numpy.ndarray, shape=(n, )
+            y: np.ndarray, shape=(n, )
                 Train output data
             kernel: function
                 Covariance function.
@@ -63,8 +63,8 @@ class GaussianProcessAD(SupervisedModel):
         """
         Update Gaussian process training data.
         """
-        x = numpy.concatenate((self.x, x_new), axis=0)
-        y = numpy.concatenate((self.y, y_new), axis=0)
+        x = np.concatenate((self.x, x_new), axis=0)
+        y = np.concatenate((self.y, y_new), axis=0)
         self.gp.fit(x, y)
 
     def predict(self, x_star):
@@ -72,15 +72,15 @@ class GaussianProcessAD(SupervisedModel):
         Predict y_star by Gaussian process
 
         Returns:
-            numpy.ndarray, shape=(n, )
+            np.ndarray, shape=(n, )
                 predict y
-            numpy.ndarray, shape=(n, )
+            np.ndarray, shape=(n, )
                 predict y lower line
-            numpy.ndarray, shape=(n, )
+            np.ndarray, shape=(n, )
                 predict y upper line
         """
         y_mean, y_cov = self.gp.predict(x_star, return_cov=True)
-        std = numpy.sqrt(numpy.diag(y_cov))
+        std = np.sqrt(np.diag(y_cov))
         lower = y_mean - std * self.ppf
         upper = y_mean + std * self.ppf
         return y_mean, lower, upper
@@ -90,11 +90,11 @@ class GaussianProcessAD(SupervisedModel):
         Evaluate gaussian process model's precision
 
         Returns:
-            numpy.ndarray, shape=(n, )
+            np.ndarray, shape=(n, )
                 Absolute percentage error
             float
                 MAPE
         """
         y_mean, lower, upper = self.predict(x_star)
-        ape = numpy.abs((y_mean - y_star) / (y_star + self.alpha))
-        return ape, numpy.average(ape)
+        ape = np.abs((y_mean - y_star) / (y_star + self.alpha))
+        return ape, np.average(ape)

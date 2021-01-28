@@ -14,8 +14,8 @@
 """
 import os
 
-import numpy
-import pandas
+import numpy as np
+import pandas as pd
 
 DATA_PATH = "example/data"
 
@@ -74,7 +74,7 @@ def data_loader(scene=None, f_name=None):
             File name
 
     Returns:
-        numpy.ndarray
+        np.ndarray
     """
     if scene is None:
         scene = get_scenes()[0]
@@ -82,7 +82,7 @@ def data_loader(scene=None, f_name=None):
         f_name = get_scene_file_names(scene)[0]
     f_name = get_scene_data_path(scene, f_name)
 
-    data = pandas.read_csv(f_name)
+    data = pd.read_csv(f_name)
     if 'value' not in data.columns:
         raise ValueError('Metric not found!')
 
@@ -92,4 +92,4 @@ def data_loader(scene=None, f_name=None):
     #     data['timestamp'] = timestamp
     #     data = data.set_index('timestamp')
 
-    return numpy.asarray(data['value'])
+    return np.asarray(data['value'])

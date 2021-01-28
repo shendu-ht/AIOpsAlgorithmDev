@@ -12,3 +12,12 @@
     Change Activity :
             version0 : 5:26 下午 by shendu.ht  init
 """
+
+
+class Constant:
+
+    # N-sigma原则，标准差倍数
+    N_SIGMA = 3
+
+    # Boxplot IQR系数
+    BOXPLOT_IQR = 1.5

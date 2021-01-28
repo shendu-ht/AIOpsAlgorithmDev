@@ -12,29 +12,40 @@
     Change Activity :
             version0 : 4:58 下午 by shendu.ht  init
 """
+import random
 import unittest
+import warnings
 
 from algorithm.supervised.gaussian_process_detector import GaussianProcessAD
-from data_preparation.cleaning.transform import slide_window
+from data_preparation.data_cleaning.transform import DataTransform
 from example.algorithm.data_loader import data_loader
 
 
 class TestSupervisedAD(unittest.TestCase):
+    """
+    测试基于监督学习的异常检测算法
+    """
 
     def test_gaussian_process(self):
-        original_data = data_loader()
-        window_list = [5, 10, 15, 20]
-        test_len = 360
+        """
+        测试基于高斯过程的异常检测
+        """
+        warnings.filterwarnings("ignore")
 
-        for window in window_list:
-            x_n, y_n = slide_window(original_data, window)
-            x_train, y_train = x_n[:-test_len, :], y_n[:-test_len]
-            x_test, y_test = x_n[-test_len:, :], y_n[-test_len:]
+        # 获取原始数据
+        original_data = data_loader('jitter', 'ja_set_online.csv')
 
-            gp_ad = GaussianProcessAD(x_train, y_train)
-            gp_ad.fit()
-            ape, mape = gp_ad.evaluate(x_test, y_test)
-            print(mape)
+        # 原始数据转换成算法输入数据
+        params = {'window': 15}
+        dt = DataTransform(original_data, mode='SlideWindow', **params)
+        x_train, y_train = dt.run()
+
+        # 高斯过程
+        index = [random.randint(0, x_train.shape[0] - 1) for _ in range(200)]
+        gp_ad = GaussianProcessAD(x_train[index], y_train[index], n_iter=10)
+        gp_ad.fit()
+
+
 
 
 
