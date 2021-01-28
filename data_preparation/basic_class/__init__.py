@@ -4,23 +4,11 @@
     Shendu HT
     Copyright (c) 2020-now All Rights Reserved.
     ----------------------------------------------------
-    File Name : smooth.py
+    File Name : __init__.py
     Author : shendu.ht
     Email : shendu.ht@outlook.com
-    Create Time : 4:26 下午
+    Create Time : 10:53 上午
     Description : description what the main function of this file
     Change Activity :
-            version0 : 4:26 下午 by shendu.ht  init
+            version0 : 10:53 上午 by shendu.ht  init
 """
-
-
-def diff_smooth(x):
-    """
-    Smooth data by diff
-    """
-
-    return
-
-
-def test():
-    return
