@@ -22,23 +22,54 @@ class DataTransform(DataClean):
     对数据进行重构
     """
 
-    def __init__(self, x, mode='SlideWindow', **params):
-        super().__init__(x=x, mode=mode, **params)
+    def __init__(self, x, mode='SlideWindow2D', **params):
+        mode_dict = {'SlideWindow1D': self.slide_window_1d, 'SlideWindow2D': self.slide_window_2d}
+        super().__init__(x=x, mode=mode, mode_dict=mode_dict, **params)
 
-        mode_dict = {'SlideWindow': self.slide_window}
-        self.func = mode_dict[mode]
+    def update_x(self, x, replace=True):
+        super().update_x(x=x, replace=replace)
 
-    def update(self, x, replace=True):
-        super().update(x=x, replace=replace)
+    def update_func(self, mode):
+        super().update_func(mode=mode)
 
-    def slide_window(self, window=15):
+    def slide_window_1d(self, window=5):
+        """
+        数据划窗，1D -> 1D
+
+        Parameters
+        ----------
+        window: int
+            滑动窗口的大小
+
+        Returns
+        -------
+        np.ndarray, shape=(self.x.shape[0] - window + 1, window)
+            划窗处理后的时序输出
+
+        """
+
+        x_n = np.ones((self.x.shape[0] - window + 1, window))
+        for i in range(x_n.shape[0]):
+            x_n[i] = self.x[i:i + window]
+        return x_n
+
+    def slide_window_2d(self, window=15):
         """
         数据划窗，1D -> 2D
 
-        Args:
-            window: int
-                滑动窗口的大小
+        Parameters
+        ----------
+        window: int
+            滑动窗口的大小
+
+        Returns
+        ----------
+        np.ndarray, shape=(self.x.shape[0] - window, window)
+            数据划窗后的输入x
+        np.ndarray, shape=(self.x.shape[0] - window,)
+            数据划窗后的输出y
         """
+
         x_n = np.ones((self.x.shape[0] - window, window))
         y_n = np.ones((self.x.shape[0] - window,))
         y_n[:] = self.x[window:]

@@ -24,13 +24,14 @@ class RemoveOutliers(DataClean):
     """
 
     def __init__(self, x, mode='RemoveNSigma', **params):
-        super().__init__(x=x, mode=mode, **params)
-
         mode_dict = {'RemoveNSigma': self.remove_n_sigma_outlier}
-        self.func = mode_dict[mode]
+        super().__init__(x=x, mode=mode, mode_dict=mode_dict, **params)
 
-    def update(self, x, replace=True):
-        super().update(x=x, replace=replace)
+    def update_x(self, x, replace=True):
+        super().update_x(x=x, replace=replace)
+
+    def update_func(self, mode):
+        super().update_func(mode=mode)
 
     def remove_n_sigma_outlier(self, n_iter=3):
         """

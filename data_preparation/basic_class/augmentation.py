@@ -4,13 +4,13 @@
     Shendu HT
     Copyright (c) 2020-now All Rights Reserved.
     ----------------------------------------------------
-    File Name : cleaning.py
+    File Name : augmentation.py
     Author : shendu.ht
     Email : shendu.ht@outlook.com
-    Create Time : 10:54 上午
+    Create Time : 11:31 上午
     Description : description what the main function of this file
     Change Activity :
-            version0 : 10:54 上午 by shendu.ht  init
+            version0 : 11:31 上午 by shendu.ht  init
 """
 from abc import ABC, abstractmethod
 
@@ -18,21 +18,23 @@ import numpy as np
 import pandas as pd
 
 
-class DataClean(ABC):
+class DataAugmentation(ABC):
     """
-    数据清洗的标准类
+    数据增强的标准类
     """
 
     @abstractmethod
     def __init__(self, x, mode, mode_dict, **params):
         """
-        为所有数据清洗手段 统一输入数据的格式
 
-        Args:
-            x: Union[list, np.ndarray, pd.Series]
-                Raw data
-            mode: str
-                数据清洗的算法名称
+        Parameters
+        ----------
+        x: list, np.ndarray, pd.Series
+            待进行数据增强的原始数据
+        mode: str
+            数据增强算法名称
+        params: dict
+            实现类的额外参数输入
         """
 
         if isinstance(x, list) or isinstance(x, pd.Series):
@@ -43,14 +45,21 @@ class DataClean(ABC):
 
         self.mode = mode
         self.mode_dict = mode_dict
-        self.func = self.mode_dict[self.mode]
+        self.func = self.mode_dict[mode]
 
         self.params = params
 
     @abstractmethod
-    def update_x(self, x, replace=True):
+    def update(self, x, replace=True):
         """
-        更新需要清洗的x
+        更新需要增强的数据x
+
+        Parameters
+        ----------
+        x: list, np.ndarray, pd.Series
+            待进行更新的数据x
+        replace:
+            若为True，进行数据替换，若为false，进行数据补充
         """
 
         if isinstance(x, list) or isinstance(x, pd.Series):
@@ -58,18 +67,14 @@ class DataClean(ABC):
         elif not isinstance(x, np.ndarray):
             raise TypeError('Only support `list`, `np.ndarray`, `pd.Series`')
 
-        if replace:
+        if replace is True:
             self.x = x
         else:
             self.x = np.concatenate((x, self.x), axis=0)
 
     @abstractmethod
-    def update_func(self, mode):
-        self.func = self.mode_dict[mode]
-
-    @abstractmethod
     def run(self):
         """
-        运行 即对数据进行清洗
+        运行，即对数据进行增强
         """
         pass
