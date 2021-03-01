@@ -19,6 +19,7 @@ import numpy as np
 from data_preparation.basic_class.cleaning import DataClean
 from data_preparation.constant import Constant
 from data_preparation.data_cleaning.remove import RemoveOutliers
+from data_preparation.data_cleaning.transform import DataTransform
 
 
 class DataSmooth(DataClean):
@@ -27,13 +28,14 @@ class DataSmooth(DataClean):
     """
 
     def __init__(self, x, mode='Diff', **params):
-        super().__init__(x=x, mode=mode, **params)
-
         mode_dict = {'Diff': self.diff_smooth, 'SG': self.savitzky_golay, 'MA': self.move_avg}
-        self.func = mode_dict[self.mode]
+        super().__init__(x=x, mode=mode, mode_dict=mode_dict, **params)
 
-    def update(self, x, replace=True):
-        super().update(x=x, replace=replace)
+    def update_x(self, x, replace=True):
+        super().update_x(x=x, replace=replace)
+
+    def update_func(self, mode):
+        super().update_func(mode=mode)
 
     def diff_smooth(self, method='N-Sigma'):
         """
@@ -86,14 +88,41 @@ class DataSmooth(DataClean):
         """
         pass
 
-    def move_avg(self, method='exp'):
+    def move_avg(self, method='avg', window=5, decay=0.8):
         """
         待添加。移动平均法，既可以选择`exp`添加decay衰减系数，对移动窗口内的数据进行加权，也可选择`avg`不加权重
+
+        Parameters
+        ----------
+        method: str
+            移动平均参数
+        window: int
+            移动平均窗口的大小
+        decay: float
+            衰减系数，指数衰减移动平均的参数
         """
-        pass
+
+        params = {'window': window}
+        dt = DataTransform(self.x, mode='SlideWindow1D', **params)
+        x_n = dt.run()
+
+        smoothed_x = np.ones((self.x.shape[0],), dtype=float)
+        if method == 'avg':
+            weight = np.ones(window, )
+        elif method == 'exp':
+            weight = np.asarray([decay ** (window - i - 1) for i in range(window)])
+        else:
+            raise ValueError('Only support `avg`, `exp`')
+
+        weight_count = np.sum(weight)
+        smoothed_x[: (window - 1)] = [np.sum(self.x[:(i + 1)] * weight[-(i + 1):]) / np.sum(weight[-(i + 1):]) for i in
+                                      range(window - 1)]
+        smoothed_x[(window - 1):] = [np.sum(x_n[i] * weight) / weight_count for i in range(x_n.shape[0])]
+        return smoothed_x
 
     def run(self):
         """
         运行 即对数据进行平滑处理
         """
         return self.func(**self.params)
+

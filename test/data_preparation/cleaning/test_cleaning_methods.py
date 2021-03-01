@@ -51,7 +51,7 @@ class TestDataCleaning(unittest.TestCase):
         测试数据格式转换下的各方法
         """
         x = np.array(range(1000))
-        mode_list = ['SlideWindow']
+        mode_list = ['SlideWindow1D', 'SlideWindow2D']
         for mode in mode_list:
             dt = DataTransform(x=x, mode=mode)
             dt.run()

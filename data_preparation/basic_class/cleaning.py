@@ -15,7 +15,7 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-from pandas import Series
+import pandas as pd
 
 
 class DataClean(ABC):
@@ -24,7 +24,7 @@ class DataClean(ABC):
     """
 
     @abstractmethod
-    def __init__(self, x, mode, **params):
+    def __init__(self, x, mode, mode_dict, **params):
         """
         为所有数据清洗手段 统一输入数据的格式
 
@@ -35,25 +35,37 @@ class DataClean(ABC):
                 数据清洗的算法名称
         """
 
-        if isinstance(x, list) or isinstance(x, Series):
+        if isinstance(x, list) or isinstance(x, pd.Series):
             x = np.asarray(x)
         elif not isinstance(x, np.ndarray):
             raise TypeError('Only support `list`, `np.ndarray`, `pd.Series`')
         self.x = x
 
         self.mode = mode
+        self.mode_dict = mode_dict
+        self.func = self.mode_dict[self.mode]
+
         self.params = params
 
     @abstractmethod
-    def update(self, x, replace=True):
+    def update_x(self, x, replace=True):
         """
-        更新需要平滑的x
+        更新需要清洗的x
         """
+
+        if isinstance(x, list) or isinstance(x, pd.Series):
+            x = np.asarray(x)
+        elif not isinstance(x, np.ndarray):
+            raise TypeError('Only support `list`, `np.ndarray`, `pd.Series`')
+
         if replace:
             self.x = x
         else:
-            x = np.concatenate((x, self.x), axis=0)
-            self.x = x
+            self.x = np.concatenate((x, self.x), axis=0)
+
+    @abstractmethod
+    def update_func(self, mode):
+        self.func = self.mode_dict[mode]
 
     @abstractmethod
     def run(self):
